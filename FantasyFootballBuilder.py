@@ -10,7 +10,7 @@ df = pd.read_csv("players.csv")
 prob = LpProblem("Fantasy Football Team Selector", LpMaximize)
 
 # define the positions and the budget
-positions = ["QB", "RB", "RB", "WR", "WR", "WR", "TE", "DST", "FLEX"]
+positions = ["QB", "RB", "RB", "WR", "WR", "WR", "TE", "DFT", "FLEX"]
 budget = 50000
 
 # create a binary variable for each player
@@ -22,7 +22,8 @@ prob += sum(player_vars[player, "QB"] for player, pos in player_vars.keys() if p
 prob += sum(player_vars[player, "RB"] for player, pos in player_vars.keys() if pos == "RB") == 2
 prob += sum(player_vars[player, "WR"] for player, pos in player_vars.keys() if pos == "WR") == 3
 prob += sum(player_vars[player, "TE"] for player, pos in player_vars.keys() if pos == "TE") == 1
-prob += sum(player_vars[player, "DST"] for player, pos in player_vars.keys() if pos == "DST") == 1
+prob += sum(player_vars[player, "DFT"] for player, pos in player_vars.keys() if pos == "DFT") == 1
+
 
 # add flex constraint
 prob += sum(player_vars[player, "RB"] for player, pos in player_vars.keys() if pos == "RB") + \

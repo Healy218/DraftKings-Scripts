@@ -41,7 +41,7 @@ TE,Goedert,4100,12.5
 TE,Hurst,3000,8.7
 TE,Gray,2500,4.1
 TE,Wilcox,2500,2.2
-DST,49ers,3000,9.4
-DST,Eagles,2800,9.2
-DST,Cheifs,2500,7.1
-DST,Bengals,2300,6.9
+DFT,SanFran,3000,9.4
+DFT,Eagles,2800,9.2
+DFT,Cheifs,2500,7.1
+DFT,Bengals,2300,6.9
