@@ -1,6 +1,6 @@
 import pandas as pd
 import pulp as pl
-from pulp import LpVariable, LpProblem, LpMaximize, LpInteger
+from pulp import LpVariable, LpProblem, LpMaximize, LpInteger, LpStatus
 
 solver = pl.getSolver('CPLEX_CMD')
 # read in the csv file
@@ -10,7 +10,7 @@ df = pd.read_csv("players.csv")
 prob = LpProblem("Fantasy Football Team Selector", LpMaximize)
 
 # define the positions and the budget
-positions = ["QB", "RB", "RB", "WR", "WR", "WR", "TE", "DFT", "FLEX"]
+positions = ["QB", "RB", "RB", "WR", "WR", "WR", "TE", "DST", "FLEX"]
 budget = 50000
 
 # create a binary variable for each player
@@ -22,16 +22,11 @@ prob += sum(player_vars[player, "QB"] for player, pos in player_vars.keys() if p
 prob += sum(player_vars[player, "RB"] for player, pos in player_vars.keys() if pos == "RB") == 2
 prob += sum(player_vars[player, "WR"] for player, pos in player_vars.keys() if pos == "WR") == 3
 prob += sum(player_vars[player, "TE"] for player, pos in player_vars.keys() if pos == "TE") == 1
-prob += sum(player_vars[player, "DFT"] for player, pos in player_vars.keys() if pos == "DFT") == 1
-
-
-# add flex constraint
-prob += sum(player_vars[player, "RB"] for player, pos in player_vars.keys() if pos == "RB") + \
-        sum(player_vars[player, "WR"] for player, pos in player_vars.keys() if pos == "WR") + \
-        sum(player_vars[player, "TE"] for player, pos in player_vars.keys() if pos == "TE") >= 1
+prob += sum(player_vars[player, "DST"] for player, pos in player_vars.keys() if pos == "DST") == 1
+prob += sum(player_vars[player, "FLEX"] for player, pos in player_vars.keys() if pos == "FLEX") == 1
 
 # add budget constraint
-prob += sum(player_vars[player, pos] * df.loc[df["player"] == player, "cost"].values[0] for player, pos in player_vars.keys()) <= budget
+prob += sum(player_vars[player_name, pos] * df.loc[df["player"] == player_name, "cost"].values[0] for player_name, pos in player_vars.keys()) <= budget
 
 # set objective function
 prob += sum(player_vars[player, pos] * df.loc[df["player"] == player, "point_value"].values[0] for player, pos in player_vars.keys())
@@ -42,8 +37,13 @@ prob.solve(solver=solver)
 # solve the LP problem
 status = prob.solve()
 
+print(LpStatus[status])
+
 # print the best team
-print("Best Team:")
-for player, pos in player_vars.keys():
-    if player_vars[player, pos].varValue == 1.0:
-        print(f"{player} - {pos} - {df.loc[df['player'] == player, 'cost'].values[0]} - {df.loc[df['player'] == player, 'point_value'].values[0]}")
+if status == 1:
+    print("Best Team:")
+    for player, pos in player_vars.keys():
+        if player_vars[player, pos].varValue == 1.0:
+            print(f"{player} - {pos} - {df.loc[df['player'] == player, 'cost'].values[0]} - {df.loc[df['player'] == player, 'point_value'].values[0]}")
+else:
+    print("The LP problem is not solved")
