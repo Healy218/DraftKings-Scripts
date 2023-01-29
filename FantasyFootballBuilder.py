@@ -21,11 +21,12 @@ for pos, count in positions.items():
     prob += sum(player_vars[player, pos] for player, p in player_vars.keys() if p == pos) == count
 
 # add constraint to ensure that the selected FLEX isn't already on the team as a RB, WR or TE
-#rb_wr_te_vars = [player_vars[player, pos] for player, pos in player_vars.keys() if pos in ["RB", "WR", "TE"]]
-#prob += sum(rb_wr_te_vars) <= 8
+# add constraint to ensure that the selected FLEX isn't already on the team as a RB, WR or TE
+rb_wr_te_vars = [player_vars[player, pos] for player, pos in player_vars.keys() if pos in ["RB", "WR", "TE"]]
 flex_vars = [player_vars[player, pos] for player, pos in player_vars.keys() if pos == "FLEX"]
-prob += sum(flex_vars) <= 1
-prob += sum([player_vars[player, "FLEX"] for player, pos in player_vars.keys() if pos in ["RB", "WR", "TE"] and player_vars[player, "FLEX"] == 1]) == 0
+for player, pos in player_vars.keys():
+    if pos in ["RB", "WR", "TE"]:
+        prob += player_vars[player, "FLEX"] <= 1 - player_vars[player, pos]
 
 
 # add budget constraint
@@ -36,6 +37,9 @@ prob += sum(player_vars[player, pos] * df.loc[df["player"] == player, "point_val
 
 # specify the CPLEX solver
 prob.solve(solver=pl.getSolver('CPLEX_CMD'))
+
+# create a list to store the results
+results = []
 
 # solve the LP problem
 status = prob.solve()
@@ -48,5 +52,22 @@ if status == 1:
     for player, pos in player_vars.keys():
         if player_vars[player, pos].varValue == 1.0:
             print(f"{player} - {pos} - ${df.loc[df['player'] == player, 'cost'].values[0]} - {df.loc[df['player'] == player, 'point_value'].values[0]} pts")
+else:
+    print("The LP problem is not solved")
+
+# check if the problem is solved
+if status == 1:
+    # loop through all players and positions
+    for player, pos in player_vars.keys():
+        if player_vars[player, pos].varValue == 1.0:
+            results.append((player, pos, df.loc[df['player'] == player, 'cost'].values[0], df.loc[df['player'] == player, 'point_value'].values[0]))
+    
+    # sort the results based on the point value in descending order
+    results.sort(key=lambda x: x[3], reverse=True)
+
+    # print the top 5 results
+    print("Top 5 Teams:")
+    for i, result in enumerate(results[:5]):
+        print(f"{i + 1}. {result[0]} - {result[1]} - ${result[2]} - {result[3]} pts")
 else:
     print("The LP problem is not solved")
