@@ -1,24 +1,33 @@
 import csv
 
-def calculate_fantasy_points(passing_yards, passing_tds, interceptions, rushing_yards, rushing_tds, receptions, receiving_yards, receiving_tds):
+def calculate_fantasy_points(passing_yards, passing_tds, interceptions, fumbles, rushing_yards, rushing_tds, receptions, receiving_yards, receiving_tds, feild_goals, sacks, dint):
     fantasy_points = 0
     passing_yards_per_point = 25
     passing_td_points = 4
     interception_points = -1
+    fumble_points = -2
     rushing_yards_per_point = 10
     rushing_td_points = 6
     reception_points = 1
     receiving_yards_per_point = 10
     receiving_td_points = 6
+    feild_goal_points = 3
+    sack_points = 1
+    dint_points = 2
+
 
     fantasy_points += passing_yards / passing_yards_per_point
     fantasy_points += passing_tds * passing_td_points
     fantasy_points += interceptions * interception_points
+    fantasy_points += fumbles * fumble_points
     fantasy_points += rushing_yards / rushing_yards_per_point
     fantasy_points += rushing_tds * rushing_td_points
     fantasy_points += receptions * reception_points
     fantasy_points += receiving_yards / receiving_yards_per_point
     fantasy_points += receiving_tds * receiving_td_points
+    fantasy_points += feild_goals * feild_goal_points
+    fantasy_points += sacks * sack_points
+    fantasy_points += dint * dint_points
 
     return fantasy_points
 
@@ -28,17 +37,21 @@ def average_stats(input_file, output_file):
     with open(input_file, 'r') as csvfile:
         reader = csv.DictReader(csvfile)
         for row in reader:
-            player_name = row['Player']
-            passing_yards = int(row['Passing Yards'])
-            passing_tds = int(row['Passing TDs'])
-            interceptions = int(row['Interceptions'])
-            rushing_yards = int(row['Rushing Yards'])
-            rushing_tds = int(row['Rushing TDs'])
-            receptions = int(row['Receptions'])
-            receiving_yards = int(row['Receiving Yards'])
-            receiving_tds = int(row['Receiving TDs'])
+            player_name = row['player']
+            passing_yards = int(row['passing_yards'])
+            passing_tds = int(row['passing_td'])
+            interceptions = int(row['interceptions'])
+            fumbles = int(row['fumbles'])
+            rushing_yards = int(row['rushing_yards'])
+            rushing_tds = int(row['rushing_tds'])
+            receptions = int(row['receptions'])
+            receiving_yards = int(row['receiving_yards'])
+            receiving_tds = int(row['receiving_tds'])
+            feild_goals = int(row['FeildGoals'])
+            sacks = int(row['Sacks'])
+            dint = int(row['DInt'])
 
-            fantasy_points = calculate_fantasy_points(passing_yards, passing_tds, interceptions, rushing_yards, rushing_tds, receptions, receiving_yards, receiving_tds)
+            fantasy_points = calculate_fantasy_points(passing_yards, passing_tds, interceptions, fumbles, rushing_yards, rushing_tds, receptions, receiving_yards, receiving_tds, feild_goals, sacks, dint)
             
             if player_name not in player_stats:
                 player_stats[player_name] = {
@@ -54,3 +67,6 @@ def average_stats(input_file, output_file):
         writer.writerow(['Player', 'Average Fantasy Points'])
         for player_name, stats in player_stats.items():
             writer.writerow([player_name, stats['fantasy_points'] / stats['games']])
+
+average_stats('MSG1.csv', 'FFMS1test.csv')
+
