@@ -1,41 +1,64 @@
-import pandas as pd
-import pulp as pl
-from pulp import LpVariable, LpProblem, LpMaximize, LpInteger, LpStatus
+import csv
 
-# read in the csv file
-df = pd.read_csv("DKSalaries.csv")
+def update_team_score(team, player_data):
+    """
+    Calculates the total score of a team based on the players in it
+    """
+    score = 0
+    captain = False
+    for p in team:
+        if p in player_data:
+            if not captain:
+                score += player_data[p]["score"] * 1.5
+                captain = True
+            else:
+                score += player_data[p]["score"]
+    return score
 
-# create a LP problem
-prob = LpProblem("Fantasy Football Team Selector", LpMaximize)
+def get_best_team(player_data, budget=50000):
+    """
+    Returns the best team based on player data and budget
+    """
+    n = len(player_data)
+    players = list(player_data.keys())
+    team = []
+    best_team = []
+    best_team_value = 0
+    best_team_score = 0
 
-# define the positions and the budget
-positions = {"QB": 1, "RB": 2, "WR": 2, "TE": 1, "DST": 1}
-budget = 50000
+    players = sorted(players, key=lambda x: player_data[x]["score"], reverse=True)
+    
+    for player in players:
+        if len(team) == 6:
+            break
+        if player_data[player]["price"] <= budget:
+            team.append(player)
+            budget -= player_data[player]["price"]
 
-# create a binary variable for each player
-player_vars = {row.Name: LpVariable(f"{row.Name}", 0, 1, LpInteger)
-              for i, row in df.iterrows()}
+    best_team = team[:]
+    best_team_value = 50000 - budget
+    best_team_score = update_team_score(best_team, player_data)
+    
+    return {"Value": best_team_value, "Score": best_team_score, "Team": best_team}
 
-# add constraints for each position
-for position in positions:
-    prob += sum(player_vars[player] for player in player_vars.keys() if df.loc[df.Name == player, 'Position'].values[0] == position) == positions[position]
-
-# add budget constraint
-prob += sum(df.loc[df.Name == player, 'Salary'].values[0] * player_vars[player] for player in player_vars.keys()) <= budget
-
-# set objective function
-prob += sum(df.loc[df.Name == player, 'AvgPointsPerGame'].values[0] * player_vars[player] for player in player_vars.keys())
-
-# solve the LP problem
-status = prob.solve()
-
-print(LpStatus[status])
-
-# print the best team
-if status == 1:
+def print_best_team(best_team, player_data):
+    """
+    Prints the best team and its value and score
+    """
+    print("Optimal")
     print("Best Team:")
-    for i, row in df.iterrows():
-        if player_vars[row.Name].varValue == 1:
-            print(f"{row.Name} - ${row.Salary} - {row.AvgPointsPerGame} pts")
-else:
-    print("The LP problem is not solved")
+    for p in best_team["Team"]:
+        print("{} - ${} - {:.2f} pts".format(p, player_data[p]["price"], player_data[p]["score"]))
+        
+def import_csv_data(file_name):
+    player_data = {}
+    with open(file_name, newline='') as csvfile:
+        reader = csv.DictReader(csvfile)
+        for row in reader:
+            player_data[row['Name']] = {"price": float(row['Salary']), "score": float(row['AvgPointsPerGame'])}
+    return player_data
+
+if __name__ == "__main__":
+    player_data = import_csv_data("DKSalaries.csv")
+    best_team = get_best_team(player_data)
+    print_best_team(best_team, player_data)
