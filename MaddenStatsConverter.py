@@ -11,10 +11,27 @@ def calculate_fantasy_points(passing_yards, passing_tds, interceptions, fumbles,
     reception_points = 1
     receiving_yards_per_point = 10
     receiving_td_points = 6
-    feild_goal_points = 3
+    feild_goal_points = 0
     sack_points = 1
     dint_points = 2
 
+    if passing_yards >= 300:
+        fantasy_points += 3
+
+    if rushing_yards >= 100:
+        fantasy_points += 3
+
+    if receptions >= 100:
+        fantasy_points += 3
+
+    for feild_goal in feild_goals:
+        if feild_goal < 40:
+            feild_goal_points = 3
+        elif feild_goal < 50:
+            feild_goal_points = 4
+        else:
+            feild_goal_points = 5
+        fantasy_points += feild_goal_points
 
     fantasy_points += passing_yards / passing_yards_per_point
     fantasy_points += passing_tds * passing_td_points
@@ -25,11 +42,11 @@ def calculate_fantasy_points(passing_yards, passing_tds, interceptions, fumbles,
     fantasy_points += receptions * reception_points
     fantasy_points += receiving_yards / receiving_yards_per_point
     fantasy_points += receiving_tds * receiving_td_points
-    fantasy_points += feild_goals * feild_goal_points
     fantasy_points += sacks * sack_points
     fantasy_points += dint * dint_points
 
     return fantasy_points
+
 
 def average_stats(input_file, output_file):
     player_stats = {}
