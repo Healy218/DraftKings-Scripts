@@ -112,5 +112,5 @@ def average_stats(input_file, output_file):
         for player_name, stats in player_stats.items():
             writer.writerow([player_name, (stats['fantasy_points'] + stats['defense_points'])/ stats['games']])
 
-average_stats('MS2G1.csv', 'test.csv')
+average_stats('stats_to_convert.csv', 'output_file_name')
 
