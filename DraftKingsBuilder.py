@@ -36,10 +36,10 @@ prob += sum(player_vars[player_name, pos] * df.loc[df["player"] == player_name, 
 prob += sum(player_vars[player, pos] * df.loc[df["player"] == player, "point_value"].values[0] for player, pos in player_vars.keys())
 
 # specify the CPLEX solver
-prob.solve(solver=pl.getSolver('CPLEX_CMD'))
+#prob.solve(solver=pl.getSolver('CPLEX_CMD'))
 
 # solve the LP problem
-status = prob.solve()
+status = prob.solve(solver=pl.GLPK())
 
 print(LpStatus[status])
 
