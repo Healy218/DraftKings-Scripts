@@ -73,22 +73,22 @@ def average_stats(input_file, output_file):
         reader = csv.DictReader(csvfile)
         for row in reader:
             player_name = row['player']
-            passing_yards = int(row['passing_yards'])
-            passing_tds = int(row['passing_td'])
-            interceptions = int(row['interceptions'])
-            fumbles = int(row['fumbles'])
-            rushing_yards = int(row['rushing_yards'])
-            rushing_tds = int(row['rushing_tds'])
-            receptions = int(row['receptions'])
-            receiving_yards = int(row['receiving_yards'])
-            receiving_tds = int(row['receiving_tds'])
-            feild_goals = int(row['FeildGoal'])
-            sacks = int(row['Sacks'])
-            dint = int(row['DInt'])
-            extra_point = int(row['Extra points']) 
-            feild_goal40 = int(row['FeildGoal40'])
-            feild_goal50 = int(row['FeildGoal50'])
-            points_allowed = int(row['PointsAllowed'])
+            passing_yards = float(row['passing_yards'])
+            passing_tds = float(row['passing_td'])
+            interceptions = float(row['interceptions'])
+            fumbles = float(row['fumbles'])
+            rushing_yards = float(row['rushing_yards'])
+            rushing_tds = float(row['rushing_tds'])
+            receptions = float(row['receptions'])
+            receiving_yards = float(row['receiving_yards'])
+            receiving_tds = float(row['receiving_tds'])
+            feild_goals = float(row['FeildGoal'])
+            sacks = float(row['Sacks'])
+            dint = float(row['DInt'])
+            extra_point = float(row['Extra points']) 
+            feild_goal40 = float(row['FeildGoal40'])
+            feild_goal50 = float(row['FeildGoal50'])
+            points_allowed = float(row['PointsAllowed'])
 
             fantasy_points = calculate_fantasy_points(passing_yards, passing_tds, interceptions, fumbles, rushing_yards, rushing_tds, receptions, receiving_yards, receiving_tds, feild_goals, extra_point, feild_goal40, feild_goal50)
             defense_points = 0
@@ -112,5 +112,5 @@ def average_stats(input_file, output_file):
         for player_name, stats in player_stats.items():
             writer.writerow([player_name, (stats['fantasy_points'] + stats['defense_points'])/ stats['games']])
 
-average_stats('stats_to_convert.csv', 'output_file_name')
+average_stats('MSGAverages.csv', 'Averages.csv')
 
