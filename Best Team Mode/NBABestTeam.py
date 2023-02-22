@@ -19,6 +19,9 @@ for i, row in df.iterrows():
     for roster_position in roster_positions:
         if (player, roster_position) not in player_vars:
             player_vars[(player, roster_position)] = LpVariable(f"{player}_{roster_position}", 0, 1, LpInteger)
+            # add constraint that player can only be selected if their status is "P"
+            if row.Status != "P":
+                prob += player_vars[(player, roster_position)] == 0    
 
 # add constraint that each player can only be selected once
 for player in df['Name'].unique():
