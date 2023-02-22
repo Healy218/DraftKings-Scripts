@@ -11,7 +11,6 @@ prob = LpProblem("Fantasy Basketball Team Selector", LpMaximize)
 positions = {"PG": 1, "SG":1, "SF":1, "PF":1, "C": 1, "G":1, "F":1, "UTIL":1}
 budget = 50000
 
-# create a binary variable for each player
 # create a binary variable for each player and roster position
 player_vars = {}
 for i, row in df.iterrows():
@@ -20,16 +19,52 @@ for i, row in df.iterrows():
     if (player, roster_position) not in player_vars:
         player_vars[(player, roster_position)] = LpVariable(f"{player}_{roster_position}", 0, 1, LpInteger)
 
-# add constraints for each position
-for pos, count in positions.items():
-    prob += lpSum([player_vars[(name, pos)] for name, p in player_vars.keys() if p == pos]) == count
+# add constraint for the PG position
+prob += sum(player_vars[(player, "PG")] for player in df["Name"].unique() if (player, "PG") in player_vars) == 1
+
+# add constraint for the SG positions
+prob += sum(player_vars[(player, "SG")] for player in df["Name"].unique() if (player, "SG") in player_vars) == 1
+
+# add constraint for the SF position
+prob += sum(player_vars[(player, "SF")] for player in df["Name"].unique() if (player, "SF") in player_vars) == 1
+
+# add constraint for the PF positions
+prob += sum(player_vars[(player, "PF")] for player in df["Name"].unique() if (player, "PF") in player_vars) == 1
+
+# add constraint for the C position
+prob += sum(player_vars[(player, "C")] for player in df["Name"].unique() if (player, "C") in player_vars) == 1
+
+# add constraint for the SG and PG positions (G position)
+# add constraint for the SG and PG positions (G position)
+guard_vars = [player_vars[player, pos] for player, pos in player_vars.keys() if pos in ["SG", "PG"]]
+for player, pos in player_vars.keys():
+    if pos == "G":
+        prob += player_vars[player, "G"] <= 1 - lpSum(guard_vars + [player_vars[player, pos]])
+
+
+# add constraint for the F position
+forward_vars = [player_vars[player, pos] for player, pos in player_vars.keys() if pos in ["SF", "PF"]]
+for player, pos in player_vars.keys():
+    if pos == "F":
+        prob += player_vars[player, "F"] <= 1 - lpSum(forward_vars + [player_vars[player, pos]])
+
+# add constraint for the UTIL positions
+utility_vars = [player_vars[player, pos] for player, pos in player_vars.keys() if pos in ["SG", "PG", "SF", "PF", "C"]]
+for player, pos in player_vars.keys():
+    if pos == "UTIL":
+        prob += player_vars[player, "UTIL"] <= 1 - lpSum(utility_vars + [player_vars[player, pos]])
 
 # add budget constraint
-prob += lpSum([player_vars[(name, pos)] * df.loc[(df["Name"] == name) & (df["Position"] == pos), "Salary"].values[0] for name, pos in player_vars.keys()]) <= budget
+budget_constraint = lpSum([player_vars[(name, pos)] * df.loc[(df["Name"] == name) & (df["Position"] == pos), "Salary"].values[0] for name, pos in player_vars.keys()]) <= budget
+#print(f"Adding budget constraint: {budget_constraint}")
+prob += budget_constraint
 
 # set objective function
-prob += lpSum([player_vars[(name, pos)] * df.loc[(df["Name"] == name) & (df["Position"] == pos), "AvgPointsPerGame"].values[0] for name, pos in player_vars.keys()])
+objective = lpSum([player_vars[(name, pos)] * df.loc[(df["Name"] == name) & (df["Position"] == pos), "AvgPointsPerGame"].values[0] for name, pos in player_vars.keys()])
+#print(f"Setting objective function: {objective}")
+prob += objective
 
+#print(prob)
 # solve the LP problem
 status = prob.solve()
 
@@ -51,3 +86,4 @@ if status == 1:
     print(f"Total points: {total_points} pts")
 else:
     print("The LP problem is not solved")
+
