@@ -20,8 +20,8 @@ for i, row in df.iterrows():
         if (player, roster_position) not in player_vars:
             player_vars[(player, roster_position)] = LpVariable(f"{player}_{roster_position}", 0, 1, LpInteger)
             # add constraint that player can only be selected if their status is "P"
-            #if row.Status != "P":
-            #    prob += player_vars[(player, roster_position)] == 0    
+            if row.Status != "P":
+                prob += player_vars[(player, roster_position)] == 0    
 
 # add constraint that no player with a salary of 2,500 or less can be selected
 for player in df['Name'].unique():
