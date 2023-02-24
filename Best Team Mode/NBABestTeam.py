@@ -2,7 +2,7 @@ import pandas as pd
 from pulp import LpVariable, LpProblem, LpMaximize, LpInteger, lpSum, LpStatus
 
 # read in the csv file
-df = pd.read_csv("NBAweek2.csv")
+df = pd.read_csv("NBAweek3.csv")
 
 # create a LP problem
 prob = LpProblem("Fantasy Basketball Team Selector", LpMaximize)
