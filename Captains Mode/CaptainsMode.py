@@ -3,7 +3,7 @@ import pulp as pl
 from pulp import LpVariable, LpProblem, LpMaximize, LpInteger, LpStatus
 
 # read in the csv file
-df = pd.read_csv("DKSalariesMS.csv")
+df = pd.read_csv("../DraftKings Scripts and Stats/MaddenSBSim.csv")
 
 # create a LP problem
 lp_maximize = LpMaximize

@@ -3,7 +3,7 @@ import pulp as pl
 from pulp import LpVariable, LpProblem, LpMaximize, LpInteger, LpStatus
 
 # read in the csv file
-df = pd.read_csv("players.csv")
+df = pd.read_csv("../DraftKings Scripts and Stats/players.csv")
 
 # create a LP problem
 prob = LpProblem("Fantasy Football Team Selector", LpMaximize)
