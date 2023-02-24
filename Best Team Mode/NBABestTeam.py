@@ -27,28 +27,32 @@ for i, row in df.iterrows():
 for player in df['Name'].unique():
     prob += sum(player_vars[(player, pos)] for pos in positions.keys() if (player, pos) in player_vars) <= 1
 
-# add constraint for the PG position
+# add constraint that each team can only be selected once
+for team in df['TeamAbbrev'].unique():
+    prob += sum(player_vars[(player, pos)] for player in df['Name'].unique() for pos in positions.keys() if (player, pos) in player_vars and df.loc[df['Name'] == player, 'TeamAbbrev'].values[0] == team) <= 1
+
+# add constraint for the Point Guard position
 prob += sum(player_vars[(player, "PG")] for player in df["Name"].unique() if (player, "PG") in player_vars) == 1
 
-# add constraint for the SG positions
+# add constraint for the Shot Guard positions
 prob += sum(player_vars[(player, "SG")] for player in df["Name"].unique() if (player, "SG") in player_vars) == 1
 
-# add constraint for the SF position
+# add constraint for the Small Forward position
 prob += sum(player_vars[(player, "SF")] for player in df["Name"].unique() if (player, "SF") in player_vars) == 1
 
-# add constraint for the PF positions
+# add constraint for the Power Forward positions
 prob += sum(player_vars[(player, "PF")] for player in df["Name"].unique() if (player, "PF") in player_vars) == 1
 
-# add constraint for the C position
+# add constraint for the Center position
 prob += sum(player_vars[(player, "C")] for player in df["Name"].unique() if (player, "C") in player_vars) == 1
 
-# add constraint for the SF position
+# add constraint for the Gaurd position
 prob += sum(player_vars[(player, "G")] for player in df["Name"].unique() if (player, "G") in player_vars) == 1
 
-# add constraint for the PF positions
+# add constraint for the Forward positions
 prob += sum(player_vars[(player, "F")] for player in df["Name"].unique() if (player, "F") in player_vars) == 1
 
-# add constraint for the C position
+# add constraint for the Utility position
 prob += sum(player_vars[(player, "UTIL")] for player in df["Name"].unique() if (player, "UTIL") in player_vars) == 1
 
 

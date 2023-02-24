@@ -31,19 +31,16 @@ for player in df['Name'].unique():
 for team in df['TeamAbbrev'].unique():
     prob += sum(player_vars[(player, pos)] for player in df['Name'].unique() for pos in positions.keys() if (player, pos) in player_vars and df.loc[df['Name'] == player, 'TeamAbbrev'].values[0] == team) <= 1
 
-# add constraint for the PG position
+# add constraint for the Center position
 prob += sum(player_vars[(player, "C")] for player in df["Name"].unique() if (player, "C") in player_vars) == 2
 
-# add constraint for the SG positions
+# add constraint for the Wing positions
 prob += sum(player_vars[(player, "W")] for player in df["Name"].unique() if (player, "W") in player_vars) == 3
 
-# add constraint for the SF position
-#prob += sum(player_vars[(player, "SF")] for player in df["Name"].unique() if (player, "SF") in player_vars) == 1
-
-# add constraint for the PF positions
+# add constraint for the Defense positions
 prob += sum(player_vars[(player, "D")] for player in df["Name"].unique() if (player, "D") in player_vars) == 2
 
-# add constraint for the Guard position
+# add constraint for the Goalie position
 prob += sum(player_vars[(player, "G")] for player in df["Name"].unique() if (player, "G") in player_vars) == 1
 
 # add constraint for the Utility position
