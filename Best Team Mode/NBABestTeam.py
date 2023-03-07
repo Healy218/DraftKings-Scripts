@@ -2,7 +2,7 @@ import pandas as pd
 from pulp import LpVariable, LpProblem, LpMaximize, LpInteger, lpSum, LpStatus
 
 # read in the csv file
-df = pd.read_csv("../DraftKings Scripts and Stats/NBA Stats/NBAgame7.csv")
+df = pd.read_csv("../DraftKings Scripts and Stats/NBA Stats/NBAgame9.csv")
 
 # create a LP problem
 prob = LpProblem("Fantasy Basketball Team Selector", LpMaximize)
@@ -29,7 +29,7 @@ for player in df['Name'].unique():
 
 # add constraint that each team can only be selected once
 for team in df['TeamAbbrev'].unique():
-    prob += sum(player_vars[(player, pos)] for player in df['Name'].unique() for pos in positions.keys() if (player, pos) in player_vars and df.loc[df['Name'] == player, 'TeamAbbrev'].values[0] == team) <= 3
+    prob += sum(player_vars[(player, pos)] for player in df['Name'].unique() for pos in positions.keys() if (player, pos) in player_vars and df.loc[df['Name'] == player, 'TeamAbbrev'].values[0] == team) <= 2
 
 # add constraint for the Point Guard position
 prob += sum(player_vars[(player, "PG")] for player in df["Name"].unique() if (player, "PG") in player_vars) == 1
@@ -61,7 +61,7 @@ budget_constraint = lpSum([player_vars[(name, pos)] * df.loc[(df["Name"] == name
 prob += budget_constraint
 
 # set objective function
-objective = lpSum([player_vars[(name, pos)] * df.loc[(df["Name"] == name) & (df["Roster Position"].str.contains(pos)), "AvgPointsPerGame"].values[0] for name, pos in player_vars.keys()])
+objective = lpSum([player_vars[(name, pos)] * df.loc[(df["Name"] == name) & (df["Roster Position"].str.contains(pos)), "WAvgPoints"].values[0] for name, pos in player_vars.keys()])
 prob += objective
 
 # solve the LP problem
@@ -77,7 +77,7 @@ if status == 1:
     for player, pos in player_vars.keys():
         if player_vars[player, pos].varValue == 1.0:
             cost = df.loc[(df['Name'] == player) & (df['Roster Position'].str.contains(pos)), 'Salary'].values[0]
-            points = df.loc[(df['Name'] == player) & (df['Roster Position'].str.contains(pos)), 'AvgPointsPerGame'].values[0]
+            points = df.loc[(df['Name'] == player) & (df['Roster Position'].str.contains(pos)), 'WAvgPoints'].values[0]
             print(f"{player} - {pos} - ${cost} - {points} pts")
             total_cost += cost
             total_points += points

@@ -2,10 +2,10 @@ import pandas as pd
 from pulp import LpVariable, LpProblem, LpMaximize, LpInteger, lpSum, LpStatus
 
 # read in the csv file
-df = pd.read_csv("../DraftKings Scripts and Stats/NHLweek2.csv")
+df = pd.read_csv("../DraftKings Scripts and Stats/NHL Stats/NHLweek2.csv")
 
 # create a LP problem
-prob = LpProblem("Fantasy Basketball Team Selector", LpMaximize)
+prob = LpProblem("Fantasy Hockey Team Selector", LpMaximize)
 
 # define the positions and the budget
 positions = {"C": 2, "W":3, "SF":1, "D":2, "G": 1, "UTIL":1}
