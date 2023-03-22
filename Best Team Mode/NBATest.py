@@ -2,7 +2,7 @@ import pandas as pd
 from pulp import LpVariable, LpProblem, LpMaximize, LpInteger, lpSum, LpStatus
 
 # read in the csv file
-df = pd.read_csv("../DraftKings Scripts and Stats/NBAgame5.csv")
+df = pd.read_csv("../DraftKings Scripts and Stats/NBA Stats/NBAgame19.csv")
 
 # create a LP problem
 prob = LpProblem("Fantasy Basketball Team Selector", LpMaximize)
@@ -29,7 +29,7 @@ for player in df['Name'].unique():
 
 # add constraint for how many players a team can have
 for team in df['TeamAbbrev'].unique():
-    prob += sum(player_vars[(player, pos)] for player in df['Name'].unique() for pos in positions.keys() if (player, pos) in player_vars and df.loc[df['Name'] == player, 'TeamAbbrev'].values[0] == team) <= 3
+    prob += sum(player_vars[(player, pos)] for player in df['Name'].unique() for pos in positions.keys() if (player, pos) in player_vars and df.loc[df['Name'] == player, 'TeamAbbrev'].values[0] == team) <= 2
 
 # count the number of players on each team with "O" status
 team_status_count = {}
@@ -72,7 +72,7 @@ budget_constraint = lpSum([player_vars[(name, pos)] * df.loc[(df["Name"] == name
 prob += budget_constraint
 
 # set objective function
-objective = lpSum([player_vars[(name, pos)] * df.loc[(df["Name"] == name) & (df["Roster Position"].str.contains(pos)), "AvgPointsPerGame"].values[0] for name, pos in player_vars.keys()])
+objective = lpSum([player_vars[(name, pos)] * df.loc[(df["Name"] == name) & (df["Roster Position"].str.contains(pos)), "EWAvgPoints"].values[0] for name, pos in player_vars.keys()])
 prob += objective
 
 # solve the LP problem
