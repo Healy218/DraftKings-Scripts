@@ -2,7 +2,7 @@ import pandas as pd
 from pulp import LpVariable, LpProblem, LpMaximize, LpInteger, lpSum, LpStatus
 
 # read in the csv file
-df = pd.read_csv("../DraftKings Scripts and Stats/NBA Stats/NBAgame19.csv")
+df = pd.read_csv("../DraftKings Scripts and Stats/NBA Stats/NBAgame21.csv")
 
 # create a LP problem
 prob = LpProblem("Fantasy Basketball Team Selector", LpMaximize)
@@ -29,18 +29,29 @@ for player in df['Name'].unique():
 
 # add constraint for how many players a team can have
 for team in df['TeamAbbrev'].unique():
-    prob += sum(player_vars[(player, pos)] for player in df['Name'].unique() for pos in positions.keys() if (player, pos) in player_vars and df.loc[df['Name'] == player, 'TeamAbbrev'].values[0] == team) <= 2
+    prob += sum(player_vars[(player, pos)] for player in df['Name'].unique() for pos in positions.keys() if (player, pos) in player_vars and df.loc[df['Name'] == player, 'TeamAbbrev'].values[0] == team) <= 3
 
 # count the number of players on each team with "O" status
-team_status_count = {}
+team_out_count = {}
 for team in df['TeamAbbrev'].unique():
-    team_status_count[team] = sum(1 for player in df[df['TeamAbbrev'] == team]['Status'] if player == 'O')
+    team_out_count[team] = sum(1 for player in df[df['TeamAbbrev'] == team]['Status'] if player == 'O')
+
+# count the number of players on each team with "L" status
+team_likely_count = {}
+for team in df['TeamAbbrev'].unique():
+    team_likely_count[team] = sum(1 for player in df[df['TeamAbbrev'] == team]['Status'] if player == 'L')
 
 # multiply the number of averagepoints by 1.1 for each player on a team with 4 or more players with "O" status
 for team in df['TeamAbbrev'].unique():
-    if team_status_count[team] >= 4:
+    if team_out_count[team] >= 4:
         players_on_team = [player for player in df[df['TeamAbbrev'] == team]['Name'].unique() if (player, roster_position) in player_vars]
-        prob += lpSum([player_vars[(player, roster_position)] * df.loc[(df["Name"] == player) & (df["Roster Position"].str.contains(roster_position)), "AvgPointsPerGame"].values[0] * 10 for player in players_on_team for roster_position in positions.keys() if (player, roster_position) in player_vars]) >= lpSum([player_vars[(player, roster_position)] * df.loc[(df["Name"] == player) & (df["Roster Position"].str.contains(roster_position)), "AvgPointsPerGame"].values[0] for player in players_on_team for roster_position in positions.keys() if (player, roster_position) in player_vars])
+        prob += lpSum([player_vars[(player, roster_position)] * df.loc[(df["Name"] == player) & (df["Roster Position"].str.contains(roster_position)), "WAvgPoints"].values[0] * 1.1 for player in players_on_team for roster_position in positions.keys() if (player, roster_position) in player_vars])
+
+# multiply the number of averagepoints by 1.2 for each player on a team with 6 or less players with "L" status
+for team in df['TeamAbbrev'].unique():
+    if team_likely_count[team] <= 6:
+        players_on_team = [player for player in df[df['TeamAbbrev'] == team]['Name'].unique() if (player, roster_position) in player_vars]
+        prob += lpSum([player_vars[(player, roster_position)] * df.loc[(df["Name"] == player) & (df["Roster Position"].str.contains(roster_position)), "WAvgPoints"].values[0] * 1.2 for player in players_on_team for roster_position in positions.keys() if (player, roster_position) in player_vars])
 
 # add constraint for the Point Guard position
 prob += sum(player_vars[(player, "PG")] for player in df["Name"].unique() if (player, "PG") in player_vars) == 1
@@ -72,7 +83,7 @@ budget_constraint = lpSum([player_vars[(name, pos)] * df.loc[(df["Name"] == name
 prob += budget_constraint
 
 # set objective function
-objective = lpSum([player_vars[(name, pos)] * df.loc[(df["Name"] == name) & (df["Roster Position"].str.contains(pos)), "EWAvgPoints"].values[0] for name, pos in player_vars.keys()])
+objective = lpSum([player_vars[(name, pos)] * df.loc[(df["Name"] == name) & (df["Roster Position"].str.contains(pos)), "WAvgPoints"].values[0] for name, pos in player_vars.keys()])
 prob += objective
 
 # solve the LP problem
@@ -88,7 +99,7 @@ if status == 1:
     for player, pos in player_vars.keys():
         if player_vars[player, pos].varValue == 1.0:
             cost = df.loc[(df['Name'] == player) & (df['Roster Position'].str.contains(pos)), 'Salary'].values[0]
-            points = df.loc[(df['Name'] == player) & (df['Roster Position'].str.contains(pos)), 'AvgPointsPerGame'].values[0]
+            points = df.loc[(df['Name'] == player) & (df['Roster Position'].str.contains(pos)), 'WAvgPoints'].values[0]
             print(f"{player} - {pos} - ${cost} - {points} pts")
             total_cost += cost
             total_points += points
