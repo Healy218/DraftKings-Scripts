@@ -2,7 +2,7 @@ import pandas as pd
 from pulp import LpVariable, LpProblem, LpMaximize, LpInteger, lpSum, LpStatus
 
 # read in the csv file
-df = pd.read_csv("../DraftKings Scripts and Stats/NBA Stats/NBAgame19.csv")
+df = pd.read_csv("../DraftKings Scripts and Stats/NBA Stats/NBAgame21.csv")
 
 # create a LP problem
 prob = LpProblem("Fantasy Basketball Team Selector", LpMaximize)
@@ -19,7 +19,7 @@ for i, row in df.iterrows():
     for roster_position in roster_positions:
         if (player, roster_position) not in player_vars:
             player_vars[(player, roster_position)] = LpVariable(f"{player}_{roster_position}", 0, 1, LpInteger)
-            # add constraint that player can only be selected if their status is "P"
+            # add constraint that player can only be selected if their status is "L"
             if row.Status != "L":
                 prob += player_vars[(player, roster_position)] == 0    
 
@@ -30,7 +30,7 @@ for player in df['Name'].unique():
 
 # add constraint that each team can only be selected once
 for team in df['TeamAbbrev'].unique():
-    prob += sum(player_vars[(player, pos)] for player in df['Name'].unique() for pos in positions.keys() if (player, pos) in player_vars and df.loc[df['Name'] == player, 'TeamAbbrev'].values[0] == team) <= 2
+    prob += sum(player_vars[(player, pos)] for player in df['Name'].unique() for pos in positions.keys() if (player, pos) in player_vars and df.loc[df['Name'] == player, 'TeamAbbrev'].values[0] == team) <= 3
 
 # add constraint for the Point Guard position
 prob += sum(player_vars[(player, "PG")] for player in df["Name"].unique() if (player, "PG") in player_vars) == 1
