@@ -36,22 +36,30 @@ team_out_count = {}
 for team in df['TeamAbbrev'].unique():
     team_out_count[team] = sum(1 for player in df[df['TeamAbbrev'] == team]['Status'] if player == 'O')
 
+print(team_out_count)
+
 # count the number of players on each team with "L" status
 team_likely_count = {}
 for team in df['TeamAbbrev'].unique():
     team_likely_count[team] = sum(1 for player in df[df['TeamAbbrev'] == team]['Status'] if player == 'L')
 
+print(team_likely_count)
+
 # multiply the number of averagepoints by 1.1 for each player on a team with 4 or more players with "O" status
 for team in df['TeamAbbrev'].unique():
     if team_out_count[team] >= 4:
-        players_on_team = [player for player in df[df['TeamAbbrev'] == team]['Name'].unique() if (player, roster_position) in player_vars]
-        prob += lpSum([player_vars[(player, roster_position)] * df.loc[(df["Name"] == player) & (df["Roster Position"].str.contains(roster_position)), "WAvgPoints"].values[0] * 1.1 for player in players_on_team for roster_position in positions.keys() if (player, roster_position) in player_vars])
+        for roster_position in positions.keys():
+            players_on_team = [player for player in df[(df['TeamAbbrev'] == team) & (df['Status'] == 'O')]['Name'].unique() if (player, roster_position) in player_vars]
+            prob += lpSum([player_vars[(player, roster_position)] * df.loc[(df["Name"] == player) & (df["Roster Position"].str.contains(roster_position)), "WAvgPoints"].values[0] * 1.1 for player in players_on_team for roster_position in positions.keys() if (player, roster_position) in player_vars])
 
 # multiply the number of averagepoints by 1.2 for each player on a team with 6 or less players with "L" status
 for team in df['TeamAbbrev'].unique():
     if team_likely_count[team] <= 6:
-        players_on_team = [player for player in df[df['TeamAbbrev'] == team]['Name'].unique() if (player, roster_position) in player_vars]
-        prob += lpSum([player_vars[(player, roster_position)] * df.loc[(df["Name"] == player) & (df["Roster Position"].str.contains(roster_position)), "WAvgPoints"].values[0] * 1.2 for player in players_on_team for roster_position in positions.keys() if (player, roster_position) in player_vars])
+        for roster_position in positions.keys():
+            players_on_team = [player for player in df[(df['TeamAbbrev'] == team) & (df['Status'] == 'L')]['Name'].unique() if (player, roster_position) in player_vars]
+            prob += lpSum([player_vars[(player, roster_position)] * df.loc[(df["Name"] == player) & (df["Roster Position"].str.contains(roster_position)), "WAvgPoints"].values[0] * 1.2 for player in players_on_team for roster_position in positions.keys() if (player, roster_position) in player_vars])
+
+#print(prob)
 
 # add constraint for the Point Guard position
 prob += sum(player_vars[(player, "PG")] for player in df["Name"].unique() if (player, "PG") in player_vars) == 1
