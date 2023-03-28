@@ -2,7 +2,7 @@ import pandas as pd
 from pulp import LpVariable, LpProblem, LpMaximize, LpInteger, lpSum, LpStatus
 
 # read in the csv file
-df = pd.read_csv("../DraftKings Scripts and Stats/NBA Stats/NBAgame21.csv")
+df = pd.read_csv("../DraftKings Scripts and Stats/NBA Stats/NBAgame22.csv")
 
 # create a LP problem
 prob = LpProblem("Fantasy Basketball Team Selector", LpMaximize)
@@ -29,7 +29,7 @@ for player in df['Name'].unique():
 
 # add constraint for how many players a team can have
 for team in df['TeamAbbrev'].unique():
-    prob += sum(player_vars[(player, pos)] for player in df['Name'].unique() for pos in positions.keys() if (player, pos) in player_vars and df.loc[df['Name'] == player, 'TeamAbbrev'].values[0] == team) <= 3
+    prob += sum(player_vars[(player, pos)] for player in df['Name'].unique() for pos in positions.keys() if (player, pos) in player_vars and df.loc[df['Name'] == player, 'TeamAbbrev'].values[0] == team) <= 2
 
 # count the number of players on each team with "O" status
 team_out_count = {}
@@ -46,18 +46,14 @@ for team in df['TeamAbbrev'].unique():
 print(team_likely_count)
 
 # multiply the number of averagepoints by 1.1 for each player on a team with 4 or more players with "O" status
-for team in df['TeamAbbrev'].unique():
-    if team_out_count[team] >= 4:
-        for roster_position in positions.keys():
-            players_on_team = [player for player in df[(df['TeamAbbrev'] == team) & (df['Status'] == 'O')]['Name'].unique() if (player, roster_position) in player_vars]
-            prob += lpSum([player_vars[(player, roster_position)] * df.loc[(df["Name"] == player) & (df["Roster Position"].str.contains(roster_position)), "WAvgPoints"].values[0] * 1.1 for player in players_on_team for roster_position in positions.keys() if (player, roster_position) in player_vars])
+#if team_out_count[team] >= 4:
+#    for roster_position in positions.keys():
+#        prob += lpSum([player_vars[(player, roster_position)] * df.loc[(df["Name"] == player) & (df["Roster Position"].str.contains(roster_position)), "WAvgPoints"].values[0] * 1.1])
 
 # multiply the number of averagepoints by 1.2 for each player on a team with 6 or less players with "L" status
-for team in df['TeamAbbrev'].unique():
-    if team_likely_count[team] <= 6:
-        for roster_position in positions.keys():
-            players_on_team = [player for player in df[(df['TeamAbbrev'] == team) & (df['Status'] == 'L')]['Name'].unique() if (player, roster_position) in player_vars]
-            prob += lpSum([player_vars[(player, roster_position)] * df.loc[(df["Name"] == player) & (df["Roster Position"].str.contains(roster_position)), "WAvgPoints"].values[0] * 1.2 for player in players_on_team for roster_position in positions.keys() if (player, roster_position) in player_vars])
+#if team_likely_count[team] <= 6:
+#    for roster_position in positions.keys():
+#        prob += lpSum([player_vars[(player, roster_position)] * df.loc[(df["Name"] == player) & (df["Roster Position"].str.contains(roster_position)), "WAvgPoints"].values[0] * 1.2])
 
 #print(prob)
 
@@ -91,8 +87,11 @@ budget_constraint = lpSum([player_vars[(name, pos)] * df.loc[(df["Name"] == name
 prob += budget_constraint
 
 # set objective function
-objective = lpSum([player_vars[(name, pos)] * df.loc[(df["Name"] == name) & (df["Roster Position"].str.contains(pos)), "WAvgPoints"].values[0] for name, pos in player_vars.keys()])
-prob += objective
+#objective = lpSum([player_vars[(name, pos)] * df.loc[(df["Name"] == name) & (df["Roster Position"].str.contains(pos)), "WAvgPoints"].values[0] for name, pos in player_vars.keys()])
+#prob += objective
+# create the objective function
+prob += lpSum([player_vars[(player, roster_position)] * df.loc[(df["Name"] == player) & (df["Roster Position"].str.contains(roster_position)), "WAvgPoints"].values[0] * (1.1 if team_out_count[df.loc[df['Name'] == player, 'TeamAbbrev'].values[0]] >= 4 else 1) * (1.2 if team_likely_count[df.loc[df['Name'] == player, 'TeamAbbrev'].values[0]] <= 6 else 1) for (player, roster_position) in player_vars])
+
 
 # solve the LP problem
 status = prob.solve()
