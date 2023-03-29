@@ -2,14 +2,14 @@ import pandas as pd
 from pulp import LpVariable, LpProblem, LpMaximize, LpInteger, lpSum, LpStatus
 
 # read in the csv file
-df = pd.read_csv("../DraftKings Scripts and Stats/NBA Stats/NBAgame22.csv")
+df = pd.read_csv("../DraftKings Scripts and Stats/NBA Stats/NBAgame23.csv")
 
 # create a LP problem
 prob = LpProblem("Fantasy Basketball Team Selector", LpMaximize)
 
 # define the positions and the budget
 positions = {"PG": 1, "SG":1, "SF":1, "PF":1, "C": 1, "G":1, "F":1, "UTIL":1}
-budget = 50000
+budget = 500000
 
 # create a binary variable for each player and each position
 player_vars = {}
@@ -62,7 +62,7 @@ budget_constraint = lpSum([player_vars[(name, pos)] * df.loc[(df["Name"] == name
 prob += budget_constraint
 
 # set objective function
-objective = lpSum([player_vars[(name, pos)] * df.loc[(df["Name"] == name) & (df["Roster Position"].str.contains(pos)), "EWAvgPoints"].values[0] for name, pos in player_vars.keys()])
+objective = lpSum([player_vars[(name, pos)] * df.loc[(df["Name"] == name) & (df["Roster Position"].str.contains(pos)), "AvgPointsPerGame"].values[0] for name, pos in player_vars.keys()])
 prob += objective
 
 # solve the LP problem
