@@ -2,7 +2,7 @@ import pandas as pd
 from pulp import LpVariable, LpProblem, LpMaximize, LpInteger, lpSum, LpStatus
 
 # read in the csv file
-df = pd.read_csv("../DraftKings Scripts and Stats/NHL Stats/NHLweek2.csv")
+df = pd.read_csv("../DraftKings Scripts and Stats/MLB Stats/MLBgame1.csv")
 
 # create a LP problem
 prob = LpProblem("Fantasy Baseball Team Selector", LpMaximize)
@@ -35,8 +35,8 @@ for player in df['Name'].unique():
     prob += sum(player_vars[(player, pos)] for pos in positions.keys() if (player, pos) in player_vars) <= 1
 
 # add constraint that each team can only be selected once
-for team in df['TeamAbbrev'].unique():
-    prob += sum(player_vars[(player, pos)] for player in df['Name'].unique() for pos in positions.keys() if (player, pos) in player_vars and df.loc[df['Name'] == player, 'TeamAbbrev'].values[0] == team) >= 2
+#for team in df['TeamAbbrev'].unique():
+#    prob += sum(player_vars[(player, pos)] for player in df['Name'].unique() for pos in positions.keys() if (player, pos) in player_vars and df.loc[df['Name'] == player, 'TeamAbbrev'].values[0] == team) >= 2
 
 # add constraint for the Pitcher position
 prob += sum(player_vars[(player, "P")] for player in df["Name"].unique() if (player, "P") in player_vars) == 2
