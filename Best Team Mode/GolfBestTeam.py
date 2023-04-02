@@ -2,13 +2,13 @@ import pandas as pd
 from pulp import LpVariable, LpProblem, LpMaximize, LpInteger, lpSum, LpStatus
 
 # read in the csv file
-df = pd.read_csv("../DraftKings Scripts and Stats/Sports Stats/NASTweek1.csv")
+df = pd.read_csv("../DraftKings Scripts and Stats/Sports Stats/Golfweek1.csv")
 
 # create a LP problem
-prob = LpProblem("Fantasy NasCar Team Selector", LpMaximize)
+prob = LpProblem("Fantasy Golf Team Selector", LpMaximize)
 
 # define the positions and the budget
-positions = {"D": 6}
+positions = {"G": 6}
 budget = 50000
 
 # create a binary variable for each player and each position
@@ -24,8 +24,8 @@ for i, row in df.iterrows():
 for player in df['Name'].unique():
     prob += sum(player_vars[(player, pos)] for pos in positions.keys() if (player, pos) in player_vars) <= 1
 
-# add constraint for the Driver position
-prob += sum(player_vars[(player, "D")] for player in df["Name"].unique() if (player, "D") in player_vars) == 6
+# add constraint for the Golfer position
+prob += sum(player_vars[(player, "G")] for player in df["Name"].unique() if (player, "G") in player_vars) == 6
 
 # add budget constraint
 budget_constraint = lpSum([player_vars[(name, pos)] * df.loc[(df["Name"] == name) & (df["Roster Position"].str.contains(pos)), "Salary"].values[0] for name, pos in player_vars.keys()]) <= budget
