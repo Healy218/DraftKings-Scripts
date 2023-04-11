@@ -13,16 +13,16 @@ df = pd.read_csv('lineup.csv')
 #plt.plot(dates, points)
 
 # set x-axis label
-plt.xlabel("Date")
+#plt.xlabel("Date")
 
 # set y-axis label
-plt.ylabel("Points")
+#plt.ylabel("Points")
 
 # set plot title
-plt.title("Points vs Dates")
+#plt.title("Points vs Dates")
 
 # display plot
-plt.show()
+#plt.show()
 
 curry_df = df[df['Name'] == 'Stephen Curry']
 
