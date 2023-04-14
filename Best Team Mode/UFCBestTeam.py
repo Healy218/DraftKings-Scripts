@@ -2,7 +2,7 @@ import pandas as pd
 from pulp import LpVariable, LpProblem, LpMaximize, LpInteger, lpSum, LpStatus
 
 # read in the csv file
-df = pd.read_csv("../DraftKings Scripts and Stats/Sports Stats/UFCweek3.csv")
+df = pd.read_csv("../DraftKings Scripts and Stats/Sports Stats/UFCweek4.csv")
 
 # create a LP problem
 prob = LpProblem("Fantasy UFC Team Selector", LpMaximize)
@@ -48,7 +48,7 @@ if status == 1:
     for player, pos in player_vars.keys():
         if player_vars[player, pos].varValue == 1.0:
             cost = df.loc[(df['Name'] == player) & (df['Roster Position'].str.contains(pos)), 'Salary'].values[0]
-            points = df.loc[(df['Name'] == player) & (df['Roster Position'].str.contains(pos)), 'AvgPointsPerGame'].values[0]
+            points = df.loc[(df['Name'] == player) & (df['Roster Position'].str.contains(pos)), 'WAvgPoints'].values[0]
             print(f"{player} - {pos} - ${cost} - {points} pts")
             total_cost += cost
             total_points += points
