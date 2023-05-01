@@ -9,21 +9,33 @@ async function run() {
 			browserWSEndpoint: `wss://${auth}@zproxy.lum-superproxy.io:9222`,
 		});
 
+		console.log('hello');
 		const page = await browser.newPage();
 		page.setDefaultNavigationTimeout(2 * 60 * 1000);
 
-		await page.goto('https://amazon.com');
+		await page.goto('https://amazon.com/Best-Sellers/zgbs');
 
-		const body = await page.$('body');
+		const productsData = await page.evaluate(() => {
+			const products = Array.from(document.querySelectorAll('.a-carousel'));
+			return products.map((product) => {
+				const titleElement = product.querySelector(
+					'.p13n-sc-truncate-desktop-type2'
+				);
+				const priceElement = product.querySelector('.p13n-sc-price');
 
-		const html = await page.evaluate(() => document.documentElement.outerHTML);
+				return {
+					title: titleElement ? titleElement.innerText.trim() : null,
+					price: priceElement ? priceElement.innerText.trim() : null,
+				};
+			});
+		});
 
-		console.log(html);
-
-		return;
+		console.log(productsData);
 	} catch (e) {
 		console.error('scrape failed', e);
 	} finally {
 		await browser?.close();
 	}
 }
+
+await run();
