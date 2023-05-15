@@ -13,7 +13,7 @@ async function run() {
 		const page = await browser.newPage();
 		page.setDefaultNavigationTimeout(2 * 60 * 1000);
 
-		await page.goto('https://amazon.com/Best-Sellers/zgbs');
+		await page.goto('https://www.espn.com/mlb/stats/player');
 
 		const productsData = await page.evaluate(() => {
 			const products = Array.from(document.querySelectorAll('.a-carousel'));
