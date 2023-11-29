@@ -18,31 +18,31 @@ def get_nfl_access_token():
 
     # Check if the request was successful
     if response.status_code == 200:
-        print('Token successfully obtained')
         return response.json().get('access_token')
+        print('good job')
     else:
         print(f"Failed to obtain token: {response.status_code}")
         return None
 
 
-def fetch_nfl_player_data(token):
-    # URL for fetching player data - replace with the specific endpoint you need
-    url = 'https://api.nfl.com/v1/players'  # Example endpoint
+def fetch_nfl_player_data():
+    # URL for the NFL API - replace with the specific endpoint you need
+    url = 'https://api.nfl.com/v1/reroute'
 
+    # Headers or parameters might be required for authorization or specific data
+    # Replace with actual headers or params as needed
     headers = {
-        'Authorization': f'Bearer {token}',
+        'Authorization': 'Bearer YOUR_API_KEY',  # Replace with your API key if needed
     }
 
     # Make the request to the NFL API
     response = requests.get(url, headers=headers)
 
-    # Print the full response for debugging
-    print("Status Code:", response.status_code)
-    print("Response:", response.text)
-
     # Check if the request was successful
     if response.status_code == 200:
         data = response.json()
+        # Process the data as needed - this will depend on the structure of the response
+        # For example, converting it to a pandas DataFrame
         df = pd.DataFrame(data)
         return df
     else:
@@ -50,11 +50,7 @@ def fetch_nfl_player_data(token):
         return None
 
 
-# Obtain the access token
-token = get_nfl_access_token()
-
-# Fetch and print the player data
-if token:
-    player_data = fetch_nfl_player_data(token)
-    if player_data is not None:
-        print(player_data)
+# Fetch and print the data
+player_data = fetch_nfl_player_data()
+if player_data is not None:
+    print(player_data)
