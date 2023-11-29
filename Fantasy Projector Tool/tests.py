@@ -1,56 +1,31 @@
-import requests
+from espn_api.football import League
+from espn_api.football import Player
 import pandas as pd
+import matplotlib.pyplot as plt
 
+# Init
+league = League(league_id=1064715703, year=2023, espn_s2='AECg5MCZ0W%2FsLl6Bt2UcmBRGTMp%2FITK75UuotCLyTl6rTMVC2z5XBrJjOXcmMo9Bb2RJIvxmQZarAwAKIN87ul0EvEctdnl3bbKjb5DQqAU9ZLlF39owuK0nC%2BHcPHEkYepNmuBphEYK3sCIwR4JDxPAg2UdkeC4fZaefDNZOlU8nFe3l8x%2F%2Fqpyf1FtZYwdOe%2FTQDjzUA0oBFFZdbmYocIi%2FIjqaw%2BMqDAhRQHKDPMGjg6dPM4phWwgADfMB75f72GkBb0Zr47qYXOExdOWb1a%2BZf5TasqSRMhVEG6%2F0UoxvQ%3D%3D',
+                swid='{5A6B5D45-5299-45F5-B11A-8A5E5713B4DB}')
 
-def get_nfl_access_token():
-    # Endpoint for obtaining the token
-    token_url = "https://api.nfl.com/v1/reroute"
+# Find Patrick Mahomes in the league teams
+mahomes = None
+for team in league.teams:
+    for player in team.roster:
+        if player.name == "Patrick Mahomes":
+            mahomes = player
+            break
+    if mahomes:
+        break
 
-    # Data and headers for the POST request
-    data = "device_id=5cb798ec-82fc-4ba0-8055-35aad432c492&grant_type=client_credentials"
-    headers = {
-        "Content-Type": "application/x-www-form-urlencoded",
-        "X-Domain-Id": "100"
-    }
-
-    # Make the POST request
-    response = requests.post(token_url, data=data, headers=headers)
-
-    # Check if the request was successful
-    if response.status_code == 200:
-        return response.json().get('access_token')
-        print('good job')
-    else:
-        print(f"Failed to obtain token: {response.status_code}")
-        return None
-
-
-def fetch_nfl_player_data():
-    # URL for the NFL API - replace with the specific endpoint you need
-    url = 'https://api.nfl.com/v1/reroute'
-
-    # Headers or parameters might be required for authorization or specific data
-    # Replace with actual headers or params as needed
-    headers = {
-        'Authorization': 'Bearer YOUR_API_KEY',  # Replace with your API key if needed
-    }
-
-    # Make the request to the NFL API
-    response = requests.get(url, headers=headers)
-
-    # Check if the request was successful
-    if response.status_code == 200:
-        data = response.json()
-        # Process the data as needed - this will depend on the structure of the response
-        # For example, converting it to a pandas DataFrame
-        df = pd.DataFrame(data)
-        return df
-    else:
-        print(f"Failed to fetch data: {response.status_code}")
-        return None
-
-
-# Fetch and print the data
-player_data = fetch_nfl_player_data()
-if player_data is not None:
-    print(player_data)
+if mahomes:
+    # Extract weekly stats into DataFrame
+    data = pd.DataFrame.from_dict(mahomes.stats, orient='index')
+    print(data)
+    # Plotting
+    plt.plot(data['points'])
+    plt.title('Weekly Fantasy Points of Patrick Mahomes')
+    plt.xlabel('Week')
+    plt.ylabel('Fantasy Points')
+    plt.show()
+else:
+    print("Patrick Mahomes not found in the league.")
