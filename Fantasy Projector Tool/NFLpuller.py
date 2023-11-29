@@ -11,21 +11,29 @@ league = League(league_id=1064715703, year=2023, espn_s2='AECg5MCZ0W%2FsLl6Bt2Uc
 mahomes = None
 for team in league.teams:
     for player in team.roster:
-        if player.name == "Patrick Mahomes":
+        if player.name == "Jordan Love":
             mahomes = player
             break
     if mahomes:
         break
 
+print(mahomes.stats[12])
 if mahomes:
-    # Extract weekly stats into DataFrame
-    data = pd.DataFrame.from_dict(mahomes.stats, orient='index')
-    print(data)
+    # Extracting week numbers and corresponding points
+    weeks = mahomes.stats.keys()
+    points = [mahomes.stats[12]['points'] for week in weeks]
+
+    # Creating DataFrame
+    data = pd.DataFrame(
+        {'Week': list(weeks), 'Points': points}).set_index('Week')
+
     # Plotting
-    plt.plot(data['points'])
+    plt.plot(data['Points'], marker='o')
     plt.title('Weekly Fantasy Points of Patrick Mahomes')
     plt.xlabel('Week')
     plt.ylabel('Fantasy Points')
+    plt.xticks(range(1, max(weeks) + 1))  # Set x-ticks to week numbers
+    plt.grid(True)
     plt.show()
 else:
     print("Patrick Mahomes not found in the league.")
