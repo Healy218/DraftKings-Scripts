@@ -31,7 +31,7 @@ if access_token:
     yahoo.token = (access_token, access_secret)
     try:
         response = yahoo.get(
-            'https://fantasysports.yahooapis.com/fantasy/v2/users;use_login=1/games;game_keys=nfl/teams')
+            'https://api.login.yahoo.com/oauth/v2/get_request_token')
         if response.status_code == 200:
             print("Successfully fetched data from API")
             print(response.text)
@@ -45,7 +45,7 @@ else:
         # Step 1: Get a request token
         print("Attempting to get a request token...")
         yahoo.fetch_request_token(
-            'https://api.login.yahoo.com/oauth/v2/get_request_token')
+            'https://api.login.yahoo.com/oauth/v2/get_request_token', 'oob')
         # Step 2: Redirect user to Yahoo for authorization
         authorization_url = yahoo.authorization_url(
             'https://api.login.yahoo.com/oauth/v2/request_auth')
