@@ -3,7 +3,7 @@ import pulp as pl
 from pulp import LpVariable, LpProblem, LpMaximize, LpInteger, LpStatus
 
 # read in the csv file
-df = pd.read_csv("../DraftKings Scripts and Stats/NFL Stats/NFLCM2.csv")
+df = pd.read_csv("../DraftKings Scripts and Stats/NFL Stats/NFLCM4.csv")
 
 # create a LP problem
 lp_maximize = LpMaximize
@@ -41,7 +41,9 @@ for player in df["Name"].unique():
             player_vars[(player, "FLEX")] <= 1
 
 # set objective function
-prob += sum(df.loc[(df["Name"] == player) & (df["Roster_Position"] == roster_position), 'AvgPointsPerGame'].values[0] * player_vars[(player, roster_position)]
+prob += sum(df.loc[(df["Name"] == player) & (df["Roster_Position"] == roster_position), 'AvgPointsPerGame'].values[0] *
+            (1.5 if roster_position == "CPT" else 1) *
+            player_vars[(player, roster_position)]
             for player, roster_position in player_vars.keys())
 
 # solve the LP problem
