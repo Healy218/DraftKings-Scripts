@@ -98,7 +98,7 @@ if( $access_token ) {
     } else {
       print "Couldn'\t fetch\n";
     }
-  } catch( OAuthException $e ) {
+  } catch( AuthException $e ) {
     print 'Error: ' . $e->getMessage() . "\n";
     print 'Error Code: ' . $e->getCode() . "\n";
     print 'Response: ' . $e->lastResponse . "\n";
@@ -135,7 +135,6 @@ if( $access_token ) {
       print " Session Handle: ${access_session}\n\n";
 
     } else {
-
       $access_token = NULL;
       $access_secret = NULL;
       $access_session = NULL;
